@@ -7,23 +7,22 @@
 #include <sstream>
 #include <cmath>
 #include <Windows.h>
-
+#include<cstdio>
+#include <algorithm>
 using namespace std;
 
 int symbol_count;
 char *symbol_array = new char[symbol_count];
 string alph = "абвгдежзийклмнопрстуфхцчшщьыэюя";
-string bigrams_my[5] = {"еш","еы","ск", "шя","до"};//до
-string bigrams_ru[5] = {"ст","но","то","на","ен"};
+string bigrams_my[5] = {"еш","еы","ск","шя","до"};//до
+string bigrams_ru[5] = {"ст","но","на","то","ен"};
 int res_a[24], res_b[24];
-//b>a
+const int q = 255;
 int funk_x(char a, char b)
 {
 	int pa= alph.find_first_of(a);
 	int pb = alph.find_first_of(b);
-
 	int X = pa * 31 + pb;
-
 	return X;
 }
 int gcd(int a, int b)
@@ -156,7 +155,6 @@ int funk_ab()
 					{
 						B = B + 961;
 					}
-					//cout << "A - " << A << endl << "B - " << B << endl;
 					res_a[u] = A; res_b[u] = B;
 					u++;
 				}
@@ -200,7 +198,6 @@ int funk_ab()
 					{
 						B = B + 961;
 					}
-					//cout << "A - " << A << endl << "B - " << B << endl;
 					res_a[u] = A; res_b[u] = B;
 					u++;
 				}
@@ -316,17 +313,126 @@ int Bigrams_without_Spaces(ifstream &myfile)
 }
 
 
+bool check(ifstream &myfile)
+{
+	char ch[5] = { 'о','е','а','и','н' };
+	stringstream string_stream;
+	string_stream << myfile.rdbuf();
+	string text_string = string_stream.str();
+	myfile.close();
+	int symbol_count;
+	symbol_count = text_string.length();
+	symbol_array = new char[symbol_count];
+	text_string.copy(symbol_array, symbol_count);
+
+
+	char symbols[q];     // масив символів без повторень
+	double chance[q];   // частота символів
+	int symbolsLenth = 0;
+
+
+	for (int i = 0; i < symbol_count; i++)
+	{
+		int flg = 0;
+		for (int j = 0; j < symbolsLenth; j++) {
+			if (symbol_array[i] == symbols[j]) {
+				chance[j]++; //якщо символи однакові збільчуємо частоту
+				flg = 1;
+				break;
+			}
+		}
+		if (!flg)
+		{
+			chance[symbolsLenth] = 1.0;
+			symbols[symbolsLenth] = symbol_array[i];
+			symbolsLenth++;
+		}
+	}
+
+	// сортування
+	int flg = 1;
+	while (flg)
+	{
+		flg = 0;
+		for (int i = 0; i < symbolsLenth - 1; i++)
+		{
+			if (chance[i] < chance[i + 1]) {
+				double tmp = chance[i];
+				chance[i] = chance[i + 1];
+				chance[i + 1] = tmp;
+				char ch = symbols[i];
+				symbols[i] = symbols[i + 1];
+				symbols[i + 1] = ch;
+				flg = 1;
+			}
+		}
+	}
+
+
+	int count = symbol_count;
+
+	float  I, sum = 0;
+
+	for (int i = 0; i < symbolsLenth; i++)
+	{
+
+		if (symbols[i] != ' ')
+		{
+			sum = sum + chance[i] * (chance[i] - 1) / (count*(count - 1));
+		}
+	}
+
+	I = sum;
+	cout << "Индекс = " << I << '\n' << '\n';
+
+	if (I > 0.055 && I < 0.059)
+	{
+
+		//перевірка частоти букв
+		char str[5];
+		for (int i = 0; i < 5; i++)
+		{
+			str[i] = symbols[i];
+			cout << str[i] << endl;
+		}
+		int l = 0;
+		
+		if (strchr(str, 'о'))
+			l++;
+		if (strchr(str, 'е'))
+			l ++ ;
+		if (strchr(str, 'а'))
+			l++;
+		if (strchr(str, 'и'))
+			l++;
+		if (strchr(str, 'н'))
+			l++;
+
+		cout << l << endl;
+
+		if (l >= 3)
+			return true;
+		else
+			return false;
+	}
+	return false;
+}
+
+
 void fun_dec(ifstream &myfile)
 {
+	
 	stringstream string_stream;
 	string_stream << myfile.rdbuf();
 	string text_string = string_stream.str();
 	myfile.close();
 	int k = 0;
 	ofstream out;
-	out.open("1.txt");
-	for (int g = 0; g < 24; g++)
+	ifstream dec;
+	
+     for (int g = 0; g < 24; g++)
 	{
+		out.open("2.txt");
 		int k = 0;
 		while (k != text_string.length())
 		{
@@ -359,9 +465,18 @@ void fun_dec(ifstream &myfile)
 
 		}
 		out << endl << endl;
-		out << "HELLOOOOO" << endl;
-	}
+		out.close();
+		
+		dec.open("2.txt");
+		if (check(dec) == true)
+		{
+			break;
+		}
+		dec.close();
+	 }
+
 }
+
 
 
 
@@ -370,26 +485,10 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	setlocale(LC_ALL, "rus");
-	//int a, b, d, x, y,m;
-	ifstream in;
-	in.open("text.txt");
-	//Bigrams_without_Spaces(in);
-	/*cout << "Put a and b" << endl;
-	cin >> a >> b;
-	//gcd_ex(a, b, &x, &y, &d);
-	//cout << d << " " << x << " " << y;
-	//cin >> a >> m;
-	//mod_reverse(a,m);
-	//fun_lin(4, 7, 18);
-	*/
-	//cout<<funk_x('в', 'б');
+	ifstream in ,dec;
+	in.open("text.txt");	
 	funk_ab();
-	/*for (int i = 0; i < 12; i++)
-	{
-		cout << res_a[i] << " " << res_b[i] << endl;
-	}
-	*/
-	fun_dec(in);
+    fun_dec(in);
 	
 	return 0;
 }
