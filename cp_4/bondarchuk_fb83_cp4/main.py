@@ -29,6 +29,8 @@ def millera_rabina(n, k):
     if n == 3 or n == 2:
         return True
     if n < 2 or n % 2 == 0:
+        #print(hex(n))
+        #print('not prime')
         return False
     else:
         t = n - 1
@@ -44,10 +46,14 @@ def millera_rabina(n, k):
             for i in range(1, s):
                 x = pow(x, 2, n)
                 if x == 1:
+                    #print(hex(n))
+                    #print('miller-robin test failed')
                     return False
                 if x == n - 1:
                     break
             if x != n - 1:
+                #print(hex(n))
+                #print('miller-robin test failed')
                 return False
         return True
 
@@ -114,8 +120,8 @@ def SendKey(e, n1, k): # Аліса відправляє n, e  k == message
     f = (p_and_q[0] - 1) * (p_and_q[1] - 1)
     d = mod_reverse(e, f)
     message = Encrypt(k, e, n1)
-    si = Decrypt(k, d, n)
-    signature = Sign(si, e, n1)
+    si = Sign(k, d, n)
+    signature = Encrypt(si, e, n1)
     return message, signature, n
 
 def ReceiveKey(message, signature, e, n): # Боб отримує повідомлення і розшифровує
@@ -125,40 +131,67 @@ def ReceiveKey(message, signature, e, n): # Боб отримує повідом
     return text, rs
 
 
+
+def Encrypt_site(message, e, n):
+    if message > n - 1:
+        print('Long message')
+        return 0
+    c_message = pow(message,e,n)
+    return c_message
+
+def Sign_site(message, d, n):
+    signature = pow(message,d,n)
+    return signature
+
+
+
+def SendKey_site(e, n1, k): # Аліса відправляє n, e  k == message
+    m = Encrypt_site(k, e1, n1)
+    p_and_q = GenerateKeyPair()  # Aліса генерує свою пару
+    n = p_and_q[0] * p_and_q[1]
+    while n > n1:
+        p_and_q = GenerateKeyPair()
+        n = p_and_q[0] * p_and_q[1]
+    f = (p_and_q[0] - 1) * (p_and_q[1] - 1)
+    d = mod_reverse(e, f)
+    s = Sign_site(k, d, n)
+    s1 = Encrypt_site(s, e1, n1)
+    return m, s, n
+
+
+
+
 if __name__ == "__main__":
 
+#Аліса надсилає Бобу повідомлення яке він має розифрувати
     text = '373'
     e = 2 ** 16 + 1
     p_and_q = GenerateKeyPair()  # Боб генерує свою пару
     f = (p_and_q[0] - 1) * (p_and_q[1] - 1)
     d1 = mod_reverse(e, f)
     n1 = p_and_q[0] * p_and_q[1]
-
     print('Аліса відправляє зашифрований текст з підписом')
     message, signature, n = SendKey(e, n1, text)
     print(message)
     print('Боб розшифровує та верифікує')
     t, res = ReceiveKey(message, signature, e, n)
-    print(t, res)
+    text = ''
+    for i in t:
+        text += str(i)
+    print((text))
+    print(res)
 
 
-    #Перевірка на сайті
+ #Перевірка на сайті
 
     print('Key: ')
-    #text = random.randint(1, 965)
-    k = 79
-    k = str(k)
-    e = 2 ** 16 + 1
-    n1 = (int('A0E773F0BA65E5FE40B8495F94EC0A5231CC838CAE16A30681ED71B11C9CE3F6642F7C169E20B6C7E374D531ED1CF975A0D30858DDC9888BFD9C06082F6B152E801',16))
-    mes, sign, n = SendKey(e, n1, k)
-    m = ' '
-    s1 = ''
-    for i in mes:
-        m += str(i)
-    for i in sign:
-        s1 += str(i)
-    print(hex(int(m)))
-    print(hex(int(s1)))
+    k = random.randint(1, 965)
+    e = 2 ** 16 + 3
+    e1 = 2 ** 16 + 1
+    n1 = (int('C80E8DE176A8C0ED237D2CC982DF7C6EA1124D5E620F84A3A99E4B6C6C421202BAEEA682BE3667742A7C4E018A21EF0B6A2DCBE330AE5E20379B597A0F5F430D',16))
+    mes, sign, n = SendKey_site(e1,n1,k)
+    print(hex(mes))
+    print(hex(sign))
     print(hex(n))
 
 
