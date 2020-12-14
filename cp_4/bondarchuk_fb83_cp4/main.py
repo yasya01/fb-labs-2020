@@ -145,18 +145,19 @@ def Sign_site(message, d, n):
 
 
 
-def SendKey_site(e, n1, k): # Аліса відправляє n, e  k == message
-    m = Encrypt_site(k, e1, n1)
+def SendKey_site(e1, n1, k): # Аліса відправляє n, e  k == message
+    mes = Encrypt_site(k, e1, n1)
     p_and_q = GenerateKeyPair()  # Aліса генерує свою пару
     n = p_and_q[0] * p_and_q[1]
     while n > n1:
         p_and_q = GenerateKeyPair()
         n = p_and_q[0] * p_and_q[1]
     f = (p_and_q[0] - 1) * (p_and_q[1] - 1)
+
     d = mod_reverse(e, f)
     s = Sign_site(k, d, n)
-    s1 = Encrypt_site(s, e1, n1)
-    return m, s, n
+    sign = Encrypt_site(s, e1, n1)
+    return mes, sign, n
 
 
 
@@ -188,7 +189,7 @@ if __name__ == "__main__":
     k = random.randint(1, 965)
     e = 2 ** 16 + 3
     e1 = 2 ** 16 + 1
-    n1 = (int('C80E8DE176A8C0ED237D2CC982DF7C6EA1124D5E620F84A3A99E4B6C6C421202BAEEA682BE3667742A7C4E018A21EF0B6A2DCBE330AE5E20379B597A0F5F430D',16))
+    n1 = (int('B286395B6903065CA7FC81E98FAFFDC430BFD000E5E1133348EC945D86119EFBAE3F6208098D64CABE4262E45E9719266210673BFB727428A538B0619EE7F5B3',16))
     mes, sign, n = SendKey_site(e1,n1,k)
     print(hex(mes))
     print(hex(sign))
