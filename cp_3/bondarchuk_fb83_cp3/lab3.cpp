@@ -1,4 +1,4 @@
-﻿// lab3.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// lab3.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include <iostream>
@@ -13,7 +13,7 @@ using namespace std;
 
 int symbol_count;
 char *symbol_array = new char[symbol_count];
-string alph = "абвгдежзийклмнопрстуфхцчшщьыэюя";
+string alph = "абвгдежзийклмнопрстуфхцчшщьыэюя";    
 string bigrams_my[5] = {"еш","еы","ск","шя","до"};//до
 string bigrams_ru[5] = {"ст","но","на","то","ен"};
 int res_a[24], res_b[24];
@@ -429,7 +429,7 @@ void fun_dec(ifstream &myfile)
 	int k = 0;
 	ofstream out;
 	ifstream dec;
-	
+	int i = 3;
      for (int g = 0; g < 24; g++)
 	{
 		out.open("2.txt");
@@ -445,8 +445,6 @@ void fun_dec(ifstream &myfile)
 			int Y = funk_x(temp, temp1);
 			int X = fmod(mod_reverse(res_a[g], 961)*(Y - res_b[g]), 961);
 
-
-
 			for (int i = 0; i < 31; i++)
 			{
 				for (int j = 0; j < 31; j++)
@@ -460,17 +458,16 @@ void fun_dec(ifstream &myfile)
 					}
 				}
 			}
-
 			k = k + 2;
-
 		}
 		out << endl << endl;
 		out.close();
 		
 		dec.open("2.txt");
 		if (check(dec) == true)
-		{
-			break;
+		{   
+			rename("2.txt", i + ".txt");
+			i++;
 		}
 		dec.close();
 	 }
@@ -487,8 +484,10 @@ int main()
 	setlocale(LC_ALL, "rus");
 	ifstream in ,dec;
 	in.open("text.txt");	
+
 	funk_ab();
     fun_dec(in);
+	
 	
 	return 0;
 }
